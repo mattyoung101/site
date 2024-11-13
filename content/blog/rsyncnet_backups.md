@@ -18,6 +18,7 @@ tags = ["infra"]
 * [Cloud storage providers](#cloud-storage-providers)
   * [rsync.net](#rsyncnet)
   * [BorgBase](#borgbase)
+  * [Backblaze B2/Wasabi/IDrive e2](#backblaze-b2wasabiidrive-e2)
 
 <!-- mtoc-end -->
 
@@ -92,9 +93,22 @@ high enough (over 3x your average monthly storage amount). I actually have no id
 but props to them, it works.
 
 ### BorgBase
-TBA
+[BorgBase](https://www.borgbase.com/) is a service that hosts Borg backups. The pricing is a very reasonable
+US$5/TB/month.
 
-In saying all this, one of the things I really do like about BorgBase is the fact that they support the Borg
-and Borgmatic projects directly. This is something I feel like rsync.net should do. Their web UI is also
-really nice too, but it wasn't enough of a reason to switch over when I automate all my backups and am
-perfectly comfortable using the CLI.
+One of the things I really like about BorgBase is the fact that they support the Borg and Borgmatic projects
+directly. This is something I feel like rsync.net should do. Their web UI is also really nice too, but it
+wasn't enough of a reason to switch over when I automate all my backups and am perfectly comfortable using the
+CLI.
+
+There are some issues I have with BorgBase. They have only been in business since 2018, and seem to be staffed
+by one person, so I was concerned about the long-term health of the service, and if they will still be running
+in say 10 years time. The other issue I discovered was [a long period of historical
+downtime](https://news.ycombinator.com/item?id=37115540), which is theoretically OK; but as the HN commenters
+point out, the description of the issue seems worryingly like the administrators have trouble maintaining a
+RAID configuration. This is concerning when BorgBase [specifically asks you not to run `borg
+check`](https://docs.borgbase.com/faq/#how-often-should-i-run-borg-check) operations to check the integrity of
+your backups, as they say it's protected by their RAID configuration.
+
+### Backblaze B2/Wasabi/IDrive e2
+These are all S3-compatible object stores.
