@@ -15,6 +15,9 @@ tags = ["infra"]
 * [Evaluating the other options](#evaluating-the-other-options)
   * [Kopia](#kopia)
   * [Rustic](#rustic)
+* [Cloud storage providers](#cloud-storage-providers)
+  * [rsync.net](#rsyncnet)
+  * [BorgBase](#borgbase)
 
 <!-- mtoc-end -->
 
@@ -27,9 +30,7 @@ provide. Google Cloud Storage has an interesting Archive tier option, which I wa
 HDD had died (!) after only a few years of non-intensive use (!), which meant this was no longer a viable
 option.
 
-![Ruh roh](/blog_nextcloud/disk_failure.png)
-
-*Ruh roh. Not btrfs this time, but actual physical disk corruption (notice the critical medium error)*
+![Ruh roh. Not btrfs this time, but actual physical disk corruption (notice the critical medium error)](/blog_nextcloud/disk_failure.png)
 
 Borg cannot sync directly to the S3-like object stores, it needs a server on the other end which needs SSH.
 So, with my backup drive dead, I started looking at other cloud based options.
@@ -64,3 +65,36 @@ Rustic.
 
 ### Rustic
 [Rustic](blah) is a Rust rewrite of [Restic](blah).
+
+## Cloud storage providers
+### rsync.net
+[rsync.net](https://rsync.net) is a cloud storage provider primarily designed for backups. Their
+infrastructure is basically FreeBSD + ZFS in a raidz3 configuration, using colocated servers in some pretty
+nice datacentres (HE.net stands out as a good example, given they partially power the internet backbone). As
+they say on [this page](https://www.rsync.net/cloudstorage.html), the combination of FreeBSD and ZFS in a good
+RAID configuration gives me confidence that the data will remain intact. Also, rsync.net have been in the game
+since 2001, so I have pretty decent confidence that they know what they're doing, and importantly, that
+they'll still be around in ten years time.
+
+In terms of pricing, no matter what way you put it, it's on the expensive side. It's not as bad as AWS/GCP hot
+storage, but it's still pricier than alternative S3 providers like Backblaze B2. They have a [secret offer
+page](https://www.rsync.net/products/borg.html) for Borg users that bills US$0.008/GB/month, so US$8/TB/month.
+This is basically the same as their regular accounts, minus Borg-specific support and ZFS snapshots, which I
+don't need. However, for reference, compare this to Backblaze B2 which is US$6/TB/month, and IDrive e2 which
+is US$5/TB/month. To be fair, the Borg pricing is _much_ better than their standard pricing, but yes - it
+still adds up.
+
+However, by far the best thing about rsync.net is there is zero bandwidth fees, forever. As in, you can
+download and upload as much as you want, 100% free of charge! As we found out above, and [as even Cloudflare
+have noted](https://blog.cloudflare.com/aws-egregious-egress/), the HyPeRsCaLeRs have
+exorbitant bandwidth fees. Even Backblaze B2 _do_ eventually charge for bandwidth when you push the bandwidth
+high enough (over 3x your average monthly storage amount). I actually have no idea how they can manage this,
+but props to them, it works.
+
+### BorgBase
+TBA
+
+In saying all this, one of the things I really do like about BorgBase is the fact that they support the Borg
+and Borgmatic projects directly. This is something I feel like rsync.net should do. Their web UI is also
+really nice too, but it wasn't enough of a reason to switch over when I automate all my backups and am
+perfectly comfortable using the CLI.

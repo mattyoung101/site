@@ -1,22 +1,15 @@
-+++
-# This title is used as the og:title on Hugo's internal
-# opengraph structured data template on the home page.
-# See https://ogp.me/ and https://gohugo.io/templates/internal#open-graph.
-title = "Matt Young"
-+++
-
 # hi!!!
 
-Hi there! My name is Matt Young - I'm a 21 year old Australian **Bachelor of Computer Science (Honours)**
+![Image I captured of myself using an Ouster OS1 LiDAR, and messed up in GIMP.](/lidar.png "420px")
+
+Hi there! My name is **Matt Young** - I'm a 21 year old Australian **Bachelor of Computer Science (Honours)**
 student at the [University of Queensland](https://uq.edu.au/), and a part-time **Graduate Software Engineer**
 at [Emesent](https://emesent.com). I completed my undergraduate Bachelor of Computer Science degree between
 Feb. 2021 and July 2024.
 
 Thanks for stopping by my website, I hope you enjoy your stay :)
 
-_Disclaimer: My writing does not necessarily represent the views of my institutions or employers._
-
-## Who am I, what am I interested in?
+## What am I interested in?
 My main interest is in computer engineering/digital design: processor design, EDA techniques and digital ASIC
 design.
 
@@ -32,7 +25,9 @@ flow for the open-source Yosys EDA tool to protect FPGAs and ASICs from Single E
 spaceflight/high reliability environments. I will be working on this through to about July 2025. The plugin is
 written in C++20, and includes extensive verification based on traditional testbenches, formal verification
 and also fuzzing. When it's finished, _TaMaRa_ will be available under the permissive [Mozilla Public License
-v2.0](https://www.mozilla.org/en-US/MPL/2.0/FAQ/).
+v2.0](https://www.mozilla.org/en-US/MPL/2.0/FAQ/), and the papers under CC-BY.
+
+You may also be interested to see my [list of projects](/projects).
 
 ## What's coming up?
 After I finish my Honours thesis, _TaMaRa_, I plan to publish it in an academic journal and perhaps even
@@ -54,7 +49,7 @@ into a startup (maybe a bit of a pipe dream yes...), or join industry. Stay tune
     - One day I'd like to migrate to FreeBSD
 - I use Neovim as my editor and WezTerm as my terminal emulator
     - Check out my le epic [dotfiles](https://github.com/mattyoung101/dotfiles) if you're so inclined
-- I've got autism (see above) (lol)
+- I've got autism spectrum disorder level 1 (see above) (lol)
 - I am bisexual 🏳️‍🌈 ‼️ [why am I telling you this?](TODO)
 
 ## Find me elsewhere...
@@ -64,4 +59,4 @@ into a startup (maybe a bit of a pipe dream yes...), or join industry. Stay tune
 
 ![](/blinkies/computer.gif)
 ![](/blinkies/rawrr.gif)
-![](/blinkies/cyal8r.gif)
+<!-- ![](/blinkies/cyal8r.gif) -->
