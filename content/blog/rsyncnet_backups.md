@@ -1,10 +1,10 @@
 +++
-title = "Using rsync.net for Borg backups"
+title = "Borg and rsync.net: a really nice backup setup"
 date = "2024-11-12T04:41:14+10:00"
 
-# description = "An optional description for SEO. If not provided, an automatically created summary will be used."
+description = "This blog post details setting up Borg and rsync.net for backups, and why they might be the best option."
 
-tags = ["infra"]
+tags = ["infra", "storage"]
 +++
 
 **Table of contents**
@@ -19,6 +19,8 @@ tags = ["infra"]
   * [rsync.net](#rsyncnet)
   * [BorgBase](#borgbase)
   * [Backblaze B2/Wasabi/IDrive e2](#backblaze-b2wasabiidrive-e2)
+  * [The elephant in the room: Australia](#the-elephant-in-the-room-australia)
+* [Setting up Borg](#setting-up-borg)
 
 <!-- mtoc-end -->
 
@@ -70,14 +72,15 @@ Rustic.
 ## Cloud storage providers
 ### rsync.net
 [rsync.net](https://rsync.net) is a cloud storage provider primarily designed for backups. Their
-infrastructure is basically FreeBSD + ZFS in a raidz3 configuration, using colocated servers in some pretty
+infrastructure is basically FreeBSD + ZFS in a raidz3 configuration, using co-located servers in some pretty
 nice datacentres (HE.net stands out as a good example, given they partially power the internet backbone). As
 they say on [this page](https://www.rsync.net/cloudstorage.html), the combination of FreeBSD and ZFS in a good
 RAID configuration gives me confidence that the data will remain intact. Also, rsync.net have been in the game
 since 2001, so I have pretty decent confidence that they know what they're doing, and importantly, that
 they'll still be around in ten years time.
 
-In terms of pricing, no matter what way you put it, it's on the expensive side. It's not as bad as AWS/GCP hot
+In terms of pricing, no matter what way you put it, it's on the expensive side. I certainly don't want to come
+across like an rsync.net shill: the pricing is a serious sticking point. It's not as bad as AWS/GCP hot
 storage, but it's still pricier than alternative S3 providers like Backblaze B2. They have a [secret offer
 page](https://www.rsync.net/products/borg.html) for Borg users that bills US$0.008/GB/month, so US$8/TB/month.
 This is basically the same as their regular accounts, minus Borg-specific support and ZFS snapshots, which I
@@ -111,4 +114,34 @@ check`](https://docs.borgbase.com/faq/#how-often-should-i-run-borg-check) operat
 your backups, as they say it's protected by their RAID configuration.
 
 ### Backblaze B2/Wasabi/IDrive e2
-These are all S3-compatible object stores.
+These are all S3-compatible object stores. As we detailed above, they have very good pricing (especially when
+compared with Amazon S3!) and are all hot storage, meaning they can be accessed instantly. The only thing
+preventing their use with Borg is that Borg needs a server running SSH on the receiving end, which of course
+these S3-compatible stores don't have. The only other option would be recording Borg backups to an external
+HDD, and then syncing the archive files using rclone to this data store, but given my terrible track record
+with disks, I decided against this.
+
+Writing this up now, I think one of Kopia/Rustic and Backblaze B2/IDrive e2 would actually be a decently good
+setup as well, and `rclone mount` would still allow me to use this as the backend for Nextcloud. With Borg,
+the main advantage I think you get is the stability: neither Kopia nor Rustic have reached their 1.0.0 release
+yet. Normally, this wouldn't bother me... but for a backup, I do feel it's
+important.
+
+In the future, if the costs get too high with rsync.net, I may move to this setup, with preference to
+Backblaze B2 due to its long-term presence.
+
+### The elephant in the room: Australia
+Anyway, we haven't addressed the elephant in the room: all these storage providers have US/EU servers, and I'm
+Australian. This is a real pain in the ass, because no matter how you spin it, speeds are going to be slow. As
+I type this up, I am _still_ syncing my backup to rsync.net at measly 18 MiB/s, and it may take several weeks
+to complete. We will just have to hope that Borg's deduplication makes the following backups faster!
+
+## Setting up Borg
+Alright, let's get into the details. After you pay rsync.net, it will take some time (up to 24 hours) for them
+to manually provision your account - which I found a little strange in 2024, but not to worry. When you do so,
+you'll get an email containing your login, which is something like `<dc><number>@<dc><number>.rsync.net`. For
+me, `dc` is `fm` for "Fremont", as that's the datacentre I picked.
+
+You will be assigned a temporary password, so the first thing I did was transfer my SSH key and disable
+password authentication in the rsync.net Account Manager. Always a good idea, especially with the automation
+we'll setup :)

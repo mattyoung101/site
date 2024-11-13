@@ -59,8 +59,52 @@ the key elements of this project is making an end-to-end solution that's availab
 EDA community.
 
 ### Slingshot
+Slingshot is a language server for the SystemVerilog hardware description language, with a focus on accurate
+multi-file completion. The overarching goal is to make SystemVerilog as intuitive to edit as C++ or Python.
+Slingshot is written in Kotlin and runs on a Java 17 JVM or higher. In the past, it was also written in Rust,
+although I ended up rewriting it in Kotlin due to problems with ANTLR and problems with concurrency (no fault
+against Rust, I just don't know how to write the language lmao).
+
+Compared to other SV LSPs, the main feature that Slingshot brings to the table is a powerful completion
+system, backed by ANTLR, that supports multi-file projects through automatic indexing. Slingshot also supports
+instant linting, backed by Verilator.
+
+At the moment, my time to work on Slingshot is limited, but I still consider it to be an active project. The
+next upgrade will be rewriting the parsing system away from ANTLR, as its error recovery has issues that makes
+it not suited for writing an LSP server. My current method to achieve this will be _slangd_, a gRPC daemon for
+the [Slang](https://github.com/MikePopoloski/slang) SystemVerilog frontend, which is one of the highest
+quality around. Another option is to rewrite the server (again...) in C++, but the C++ LSP library ecosystem
+is severely lacking - so I'll either need to yoink
+[clangd's](https://github.com/llvm/llvm-project/tree/main/clang-tools-extra/clangd), which is tied to LLVM, or
+hack on [an existing library](https://github.com/kuafuwang/LspCpp).
+
+[You can try Slingshot here &rarr;](https://github.com/mattyoung101/slingshot)
 
 ### storage.horse
+[storage.horse](https://storage.horse/) is a Nextcloud instance for my friends and family. It runs on FreeBSD
+and uses rsync.net via rclone as the storage backend. I'm also going to blog about the process of setting this
+up!
+
+Here are the full specs:
+
+- **OS:** FreeBSD 14
+- **Cloud:**
+    - Servers: Google Cloud Compute, datacentre in Sydney, Australia
+    - Storage: rsync.net (also used by my Borg backups), datacentre in Fremont, California, USA
+- **Database:** PostgreSQL
+- **Capacity:** ~2 TB (initial capacity; can be expanded)
+
+Some additional features:
+
+- Storage is encrypted between Google Cloud and rsync.net using rclone's `crypt` backend (XSalsa20 and
+Poly1305 ciphers)
+    - This means that data is effectively encrypted "at rest" and cannot be read by rsync.net
+    - Data is (sadly) _not_ encrypted at rest per-user, so I (the admin) can still read everyone's files (!)
+- Various tuning that I'll eventually write a blog about, including the use of the BBR TCP congestion
+algorithm
+
+**Please note** that storage.horse is invite only to my friends and family, and will almost certainly never be
+open to public registrations due to issues with preventing abuse.
 
 ## Past projects
 ### musicvis3d (2024)
