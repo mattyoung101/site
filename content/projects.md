@@ -16,7 +16,7 @@ The following is a list of projects I'm working on, or have worked on.
 * [Past projects](#past-projects)
   * [musicvis3d (2024)](#musicvis3d-2024)
   * [Hermes/Atlas (2023)](#hermesatlas-2023)
-* [Other misc. things I've done](#other-misc-things-ive-done)
+* [Other fun things I've done](#other-fun-things-ive-done)
 
 <!-- mtoc-end -->
 
@@ -59,6 +59,10 @@ the key elements of this project is making an end-to-end solution that's availab
 EDA community.
 
 ### Slingshot
+_Category: Computer engineering/EDA_
+
+_Licence: Mozilla Public License v2.0_
+
 Slingshot is a language server for the SystemVerilog hardware description language, with a focus on accurate
 multi-file completion. The overarching goal is to make SystemVerilog as intuitive to edit as C++ or Python.
 Slingshot is written in Kotlin and runs on a Java 17 JVM or higher. In the past, it was also written in Rust,
@@ -81,24 +85,30 @@ hack on [an existing library](https://github.com/kuafuwang/LspCpp).
 [You can try Slingshot here &rarr;](https://github.com/mattyoung101/slingshot)
 
 ### storage.horse
+_Category: Infrastructure_
+
+_Licence: N/A; Nextcloud is AGPL though_
+
 [storage.horse](https://storage.horse/) is a Nextcloud instance for my friends and family. It runs on FreeBSD
-and uses rsync.net via rclone as the storage backend. I'm also going to blog about the process of setting this
+and uses Wasabi via rclone as the storage backend. I'm also going to blog about the process of setting this
 up!
 
 Here are the full specs:
 
 - **OS:** FreeBSD 14
 - **Cloud:**
-    - Servers: Google Cloud Compute, datacentre in Sydney, Australia
-    - Storage: rsync.net (also used by my Borg backups), datacentre in Fremont, California, USA
+    - **Servers**: Google Cloud Compute, datacentre in Sydney, Australia
+    - **Storage**: [Wasabi](https://wasabi.com/), datacentre in Sydney, Australia; with offsite backups to
+    [rsync.net](https://www.rsync.net/) (datacentre in Fremont, CA, USA)
 - **Database:** PostgreSQL
-- **Capacity:** ~2 TB (initial capacity; can be expanded)
+- **Storage backend:** `rclone mount` with a bunch of tuning
+- **Capacity:** ~1 TB (initial capacity; can be expanded)
 
 Some additional features:
 
-- Storage is encrypted between Google Cloud and rsync.net using rclone's `crypt` backend (XSalsa20 and
+- Storage is encrypted between Google Cloud and Wasabi/rsync.net using rclone's `crypt` backend (XSalsa20 and
 Poly1305 ciphers)
-    - This means that data is effectively encrypted "at rest" and cannot be read by rsync.net
+    - This means that data is effectively encrypted "at rest" and cannot be read by Wasabi or rsync.net
     - Data is (sadly) _not_ encrypted at rest per-user, so I (the admin) can still read everyone's files (!)
 - Various tuning that I'll eventually write a blog about, including the use of the BBR TCP congestion
 algorithm
@@ -125,7 +135,11 @@ I implemented this for the course COSC3500 at UQ, in 2024.
 
 ### Hermes/Atlas (2023)
 
-## Other misc. things I've done
+## Other fun things I've done
+These are other cool (I think) things I've gotten up to, that don't really need their own category.
+
+**2024**
+
 - I [patched](https://github.com/intel/media-driver/commit/454a82ee3f82bb274494b97f4892fb8f88fe33f3)
 Intel's media-driver to fix a [segfault bug](https://github.com/intel/media-driver/issues/1859).
 - I [fuzzed Yosys in a Docker container](https://github.com/mattyoung101/yosys_honggfuzz_docker), which

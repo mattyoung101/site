@@ -21,6 +21,11 @@ tags = ["infra", "storage"]
   * [Backblaze B2/Wasabi/IDrive e2](#backblaze-b2wasabiidrive-e2)
   * [The elephant in the room: Australia](#the-elephant-in-the-room-australia)
 * [Setting up Borg](#setting-up-borg)
+* [Config snippets](#config-snippets)
+  * [Repository checks](#repository-checks)
+  * [Healthchecks](#healthchecks)
+  * [Exclude patterns](#exclude-patterns)
+* [Conclusion](#conclusion)
 
 <!-- mtoc-end -->
 
@@ -111,7 +116,11 @@ downtime](https://news.ycombinator.com/item?id=37115540), which is theoretically
 point out, the description of the issue seems worryingly like the administrators have trouble maintaining a
 RAID configuration. This is concerning when BorgBase [specifically asks you not to run `borg
 check`](https://docs.borgbase.com/faq/#how-often-should-i-run-borg-check) operations to check the integrity of
-your backups, as they say it's protected by their RAID configuration.
+your backups, as they say it's protected by their RAID configuration. In fact, look, I'm going to go out and
+say I really disagree with this. The linked article says they will actually start to get cross with you and
+kill any `borg check` jobs, which I personally think is really poor form. Yes, I'm sure it absolutely
+increases IO overhead and reduces disk life, but if a customer is paying for your service, they should be
+entitled to validate the integrity of their backups.
 
 ### Backblaze B2/Wasabi/IDrive e2
 These are all S3-compatible object stores. As we detailed above, they have very good pricing (especially when
@@ -145,3 +154,175 @@ me, `dc` is `fm` for "Fremont", as that's the datacentre I picked.
 You will be assigned a temporary password, so the first thing I did was transfer my SSH key and disable
 password authentication in the rsync.net Account Manager. Always a good idea, especially with the automation
 we'll setup :)
+
+After that, I find generally the best way to run Borg is through [Borgmatic](https://torsion.org/borgmatic/),
+which is really nice tool that makes using Borg a breeze. It's available as an Arch package and for most other
+distros as well.
+
+With Borgmatic installed, you can use `borgmatic config generate` to generate a starter config, which is saved
+to `~/.config/borgmatic/config.yaml`. You'll need to edit this, so grab Neovim or your preferred editor!
+
+The first thing to do is to setup the repository to connect to rsync.net, for example, for me I use this:
+
+```yaml
+repositories:
+    - path: "ssh://fm<number>@fm<number>.rsync.net/./serpent_borg"
+      label: SerpentLinuxBackup
+```
+
+You will also need to change the remote path of the Borg executable. Currently, the latest available on
+rsync.net (which I confirmed via email) is Borg 1.2. If you don't specify this, you will end up with a _very_
+ancient, pre-1.0 version of Borg! So, make sure to configure this as follows:
+
+```yaml
+remote_path: borg12
+```
+
+The rsync.net team has confirmed with me in future that Borg 1.4 and Borg 2.0 will be made available when the
+team considers them to be stable.
+
+You should also set a password in the `encryption_passphrase` field. You can also pull this in from a third
+party program - I was going to pull it in from 1Password, but decided it was easier to just keep it in the
+YAML file.
+
+There's lots more to change, so here's a brief list of modifications I typically make on my machines:
+
+- Set source directories to `/home` and `/etc`
+- Set `atime: false` to reduce churn
+- Setup a bunch of exclude patterns, which I'll list in full below
+- Set `exclude_caches: true`, which will remove ccache caches and a few other non-necessary caches
+- Set `checkpoint_interval: 900`. More frequent checkpoints mean you can CTRL+C Borg and have to do less work
+  when you restart it.
+- Set the compression: `compression: zstd,13`. Zstd is by far the best compression algorithm, and I find level
+  13 is decent for backups. Bare in mind that Borg uses single-threaded Zstd compression, so can be slow (even
+  for Zstd). You can use higher ratios if you desire, but I'd stick to Zstd personally - there's not much
+  point in using Zlib or anything else nowadays.
+- Set `retries: 4` and `retry_wait: 10`. Network interrupts are inevitable, this will make Borgmatic restart
+  if it gets interrupted.
+- I usually set a flat `keep_within: 2y` for the retention, but other retention policies are perfectly fine as
+  well. This works for me because I have essentially limitless backup space, and only run a backup once a
+  week.
+- I typically also configure [Healthchecks](https://healthchecks.io/) Cron job monitoring, which is a free and
+  quick way to ensure your backup stays running.
+- You'll also want to configure repository checks. As we mentioned above, BorgBase suggested _not_ running
+  repository checks _at all_, which I personally strongly disagree with. That being said, we do have to take
+  into account that our data is stored on a RAID cluster. For this, I configure a light `repository` check once
+  every 2 months, which I'll post in full below.
+
+## Config snippets
+Cool! So a few things I mentioned above have long YAML snippets associated with them, which I'll dump here.
+
+### Repository checks
+This configures a light repository check every 2 months, given our storage is RAID backed.
+
+```yaml
+checks:
+    # Name of consistency check to run: "repository",
+    # "archives", "data", and/or "extract". "repository"
+    # checks the consistency of the repository, "archives"
+    # checks all of the archives, "data" verifies the
+    # integrity of the data within the archives, and "extract"
+    # does an extraction dry-run of the most recent archive.
+    # Note that "data" implies "archives". See "skip_actions"
+    # for disabling checks altogether.
+    - name: repository
+      # How frequently to run this type of consistency check (as
+      # a best effort). The value is a number followed by a unit
+      # of time. E.g., "2 weeks" to run this consistency check
+      # no more than every two weeks for a given repository or
+      # "1 month" to run it no more than monthly. Defaults to
+      # "always": running this check every time checks are run.
+      frequency: 2 months
+```
+
+### Healthchecks
+This is a simple way, using Healthchecks.io, to monitor that your backup job is running as intended.
+
+```yaml
+healthchecks:
+    # Healthchecks ping URL or UUID to notify when a backup
+    # begins, ends, errors, or to send only logs.
+    ping_url: 'YOUR_HEALTHCHECKS_URL'
+
+    # Verify the TLS certificate of the ping URL host. Defaults to
+    # true.
+    # verify_tls: false
+
+    # Send borgmatic logs to Healthchecks as part the "finish",
+    # "fail", and "log" states. Defaults to true.
+    send_logs: true
+
+    # Number of bytes of borgmatic logs to send to Healthchecks,
+    # ideally the same as PING_BODY_LIMIT configured on the
+    # Healthchecks server. Set to 0 to send all logs and disable
+    # this truncation. Defaults to 100000.
+    # ping_body_limit: 200000
+
+    # List of one or more monitoring states to ping for: "start",
+    # "finish", "fail", and/or "log". Defaults to pinging for all
+    # states.
+    states:
+        - start
+        - finish
+```
+
+### Exclude patterns
+I wouldn't be surprised if this is the most useful part of this blog post. Tracking down these caches is a
+never-ending game of cat and mouse. We want to avoid Borg backing up useless caches (like, for example,
+Discord's image cache), but these are all stored in random locations in my home folder. So! Here's my list so
+far. For the lines with `/home/matt`, you'll need to replace that with your username of course.
+
+```yaml
+exclude_patterns:
+    - ~/.gradle
+    - ~/.lnav
+    - ~/.dropbox
+    - ~/.dropbox-dist
+    - ~/.config/google-chrome
+    - ~/.vscode
+    - ~/.config/spotify
+    - ~/.config/discord
+    - ~/.config/google-chrome
+    - ~/.local
+    - ~/.minecraft/assets*
+    - ~/.minecraft/runtime*
+    - ~/.cache
+    - ~/.config/Code
+    - ~/.config/Microsoft
+    - ~/.config/pulse
+    - ~/.config/session
+    - ~/.mozilla
+    - ~/.nv
+    - ~/.config/nvm
+    - ~/.hunter
+    - ~/.lutriswineprefix
+    - ~/.thunderbird
+    - ~/.zoom
+    - /home/lost+found
+    - /etc/NetworkManager
+    - /etc/cups
+    - /etc/gufw
+    - /etc/ppp
+    - /etc/security
+    - /etc/ssl
+    - /etc/sudo*
+    - /etc/ufw
+    - /etc/*shadow*
+    - /etc/libvirt
+    - ~/.steam/debian-installation/steamapps/common/
+    - ~/.steam/debian-installation/steamapps/shadercache/
+    - ~/tools/xilinx
+    - ~/tools/MATLAB
+    - ~/*/.cache
+    - /home/matt/Downloads
+    - /home/matt/.steam/debian-installation/package
+    - /home/matt/.steam/debian-installation/ubuntu12_32
+    - /home/matt/.config/vesktop
+    - /home/matt/.config/Nextcloud/logs
+    - /home/matt/go
+    - /home/matt/.minecraft/locales
+    - /home/matt/.rustup/toolchains
+    - /home/matt/.minecraft/launcher
+```
+
+## Conclusion
