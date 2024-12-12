@@ -70,7 +70,11 @@ Outside of tech stuff, in 2025 I'm also looking to start training to be a techni
     - One day I'd like to migrate to FreeBSD
 - I use Neovim as my editor and WezTerm as my terminal emulator
     - Check out my le epic [dotfiles](https://github.com/mattyoung101/dotfiles) if you're so inclined
-- I've got autism spectrum disorder level 1 (see above) (lol)
+
+**Personal stuff...**
+
+- I've got autism spectrum disorder level 1 (see section "Nerd stuff"/this entire blog... lol)
+- I also have [dyscalculia](https://en.wikipedia.org/wiki/Dyscalculia), aka "dyslexia for maths"
 - I am bisexual 🏳️‍🌈 ‼️
 
 ## Find me elsewhere...
@@ -110,11 +114,11 @@ Outside of tech stuff, in 2025 I'm also looking to start training to be a techni
 ![](/blinkies/tabs.gif)
 ![](/blinkies/catboy_rights.gif)
 
-
-Button credits:
+{{< details title="Button credits" >}}
 - https://blinkies.cafe/
 - https://cyber.dabamos.de/88x31/index.html
 - https://yesterweb.org/graphics/buttons
 - https://rainy.gay/pride/pridebuttons
 - https://nelle.observer/
 - https://vidapon.net/freebies/
+{{< /details >}}

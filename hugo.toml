@@ -22,6 +22,12 @@ enableRobotsTXT = true
 
 ignoreLogs = ['warning-goldmark-raw-html']
 
+[markup]
+  defaultMarkdownHandler = "goldmark"
+  [markup.goldmark]
+    [markup.goldmark.extensions]
+      footnote = true
+
 [params]
   # The "description" of your website. This is used in the meta data of your generated html.
   description = "Website of Matt Young"

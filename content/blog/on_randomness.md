@@ -1,5 +1,5 @@
 +++
-title = "On_randomness"
+title = "On randomness"
 date = "2024-11-22T09:29:52+10:00"
 
 #
@@ -7,7 +7,13 @@ date = "2024-11-22T09:29:52+10:00"
 #
 # description = "An optional description for SEO. If not provided, an automatically created summary will be used."
 
-tags = ["c++","computer-engineering","eda","infra","programming-languages","storage",]
+tags = []
 +++
 
-This is a page about »On_randomness«.
+Intro will start with random words.
+
+Comparing PCG and Xoroshiro.
+
+Discussing PCG vs Xoroshiro drama.
+
+Discussing PRNGs vs CSPRNGs.
